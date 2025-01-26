@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/CSS/admin.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</head>
+<body>
+    <h1 class="align text-center">Admin Dashboard</h1>
+    <form class="row" id="add-product-form" action="/products/scan" method="post" enctype="multipart/form-data">
+        <label for="product-name">Name of product</label>
+        <input class="col" type="text" id="product-name" name="product-name" required>
+
+        <label for="product-quantity">Quantity Required</label>
+        <input class="col" type="number" id="product-quantity" name="product-quantity" required>
+
+        <label for="product-price">Price of product in Naira(#)</label>
+        <input class="col" type="number" id="product-price" name="product-price" required>
+
+        <label for="product-image">Image of product</label>
+        <input class="col" type="file" id="product-image" accept="image/*" name="product-image" required><br>
+        
+        <div class="button align text-center">
+            <button type="submit" name="submit">Upload</button>
+        </div>
+    </form>
+
+    <p class="align text-center">For your Inventory Selection, click "Upload" to add to your store.</p>
+
+    <!-- Product List Container -->
+    <div id="product-list" class="align text-center"></div>
+
+    <script>
+        const form = document.getElementById('add-product-form');
+        const productList = document.getElementById('product-list');
+
+        // Handle form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Create FormData object
+            const formData = new FormData();
+            formData.append('name', document.getElementById('product-name').value);
+            formData.append('quantity', document.getElementById('product-quantity').value);
+            formData.append('price', document.getElementById('product-price').value);
+            formData.append('imageurl', document.getElementById('product-image').files[0]);
+
+            // Send POST request to the server
+            const response = await fetch('/products/scan', {
+                method: 'POST',
+                body: formData, // No need to set Content-Type header for FormData
+            });
+
+            if (response.ok) {
+                alert('Product added successfully');
+                loadProducts(); // Refresh the product list
+            } else {
+                alert('Failed to add product');
+            }
+        });
+
+        // Load and display products
+        async function loadProducts() {
+            const response = await fetch('/products');
+            const products = await response.json();
+
+            productList.innerHTML = ''; // Clear the product list
+            products.forEach(product => {
+                productList.innerHTML += `
+                    <div class="product-item">
+                        <h3>${product.name}</h3>
+                        <p>Quantity: ${product.quantity}</p>
+                        <p>Price: ₦${product.price}</p>
+                        <img src="${product.imageUrl}" width="100" alt="${product.name}">
+                        <button onclick="deleteProduct(${product.id})">Delete</button>
+                    </div>`;
+            });
+        }
+
+        // Delete a product
+        async function deleteProduct(productId) {
+            const response = await fetch(`/products/${productId}`, {
+                method: 'DELETE',
+            });
+
+            if (response.ok) {
+                alert('Product deleted successfully');
+                loadProducts(); // Refresh the product list
+            } else {
+                alert('Failed to delete product');
+            }
+        }
+
+        // Load products when the page loads
+        loadProducts();
+    </script>
+</body>
+</html>

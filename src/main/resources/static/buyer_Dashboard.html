@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Buyer Dashboard</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/CSS/dashboard_buyer.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css">
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <div class="logo"></div>
+        <ul class="menu">
+            <li class="active"><a href="#"><i class="bi bi-cash"></i><span>Dashboard</span></a></li>
+            <li><a href="profile.html"><i class="bi bi-person-circle"></i><span>Profile</span></a></li>
+            <li><a href="#"><i class="bi bi-wallet"></i><span>Topup</span></a></li>
+            <li><a href="#"><i class="bi bi-qr-code-scan"></i><span>Scan QR</span></a></li>
+            <li><a href="#"><i class="bi bi-qr-code"></i><span>Generate QR</span></a></li>
+            <li class="log_out"><a href="#" id="logout"><i class="bi bi-box-arrow-left"></i><span>Logout</span></a></li>
+        </ul>
+    </div>
+    <button id="sidebarToggle" class="sidebar-toggle"><i class="bi bi-list"></i></button>
+    <div class="main--content">
+        <div class="header--wrapper">
+            <div class="header--title">
+                <span>Primary</span>
+                <h2>Buyer Dashboard</h2>
+            </div>
+            <div class="users--info">
+                <div class="search--box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" placeholder="Search" />
+                    <div class="user--details">
+                        <span th:text="${userName}">User Name</span>
+                        <span th:text="${userEmail}">user@example.com</span>
+                    </div>
+                </div>
+                <img src="Assets/profile.jpg" alt="">
+            </div>
+        </div>
+
+        <!-- Balance and Expenditure Section -->
+        <div class="card--container">
+            <h3 class="main--title">Today's Data</h3>
+            <div class="card--wrapper">
+                <div class="payment--card light-red">
+                    <div class="card--header">
+                        <div class="amount">
+                            <span class="title">Available Balance</span>
+                            <span class="amount-value" id="balance">$500.00</span>
+                        </div>
+                        <i class="bi bi-currency-dollar icon"></i>
+                    </div>
+                    <button id="click" onclick="toggleBalance()">
+                        <i class="bi bi-eye" id="eye-icon"> Hide Balance</i>
+                    </button>
+                </div>
+                <div class="payment--card light-green">
+                    <div class="card--header">
+                        <div class="amount">
+                            <span class="title">Payment Amount</span>
+                            <span class="amount-value">$500.00</span>
+                        </div>
+                        <i class="bi bi-cash icon dark-green"></i>
+                    </div>
+                    <span class="card-details">**** **** **** 3484</span>
+                </div>
+                <div class="payment--card light-purple">
+                    <div class="card--header">
+                        <div class="amount">
+                            <span class="title">Payment Order</span>
+                            <span class="amount-value">Cart Items</span>
+                        </div>
+                        <a href="shopping_cart.html" class=""><i class="bi bi-list icon dark-purple"></i></a>
+                    </div>
+                    <span class="card-details">Add more to cart</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expenditure Chart -->
+        <div class="charts--wrapper">
+            <div class="chart-container">
+                <h3>Expenditure Trends</h3>
+                <canvas id="expenditureChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Transaction History -->
+        <div class="tabular--wrapper">
+            <h2>Transaction History</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>2023-05-10</td>
+                            <td>Milk, Eggs, Fish</td>
+                            <td>$2000</td>
+                            <td>Success</td>
+                        </tr>
+                        <tr>
+                            <td>2023-05-10</td>
+                            <td>Perfume, Smartphone</td>
+                            <td>$6000</td>
+                            <td>Success</td>
+                        </tr>
+                        <tr>
+                            <td>2023-05-10</td>
+                            <td>Coleslaw</td>
+                            <td>$4000</td>
+                            <td>Success</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.querySelector('.sidebar');
+            const sidebarToggle = document.querySelector('.sidebar-toggle');
+        
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+        });
+        // Initialize Expenditure Chart
+        const expenditureChartCtx = document.getElementById('expenditureChart').getContext('2d');
+        const expenditureChart = new Chart(expenditureChartCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                datasets: [{
+                    label: 'Expenditure',
+                    data: [300, 500, 450, 600, 700, 800, 900],
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Monthly Expenditure Trends',
+                    },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                    },
+                },
+            },
+        });
+
+        // Toggle Balance Visibility
+        let isHidden = false;
+        let balanceAmount = 500.00; // Replace with dynamic value from backend
+
+        function toggleBalance() {
+            const balanceElement = document.getElementById("balance");
+            const eyeIcon = document.getElementById("eye-icon");
+
+            if (isHidden) {
+                balanceElement.textContent = `$${balanceAmount.toFixed(2)}`;
+                eyeIcon.textContent = " Hide Balance";
+            } else {
+                balanceElement.textContent = "****";
+                eyeIcon.textContent = " Show Balance";
+            }
+            isHidden = !isHidden;
+        }
+        const buyer = JSON.parse(sessionStorage.getItem('buyer'));
+        console.log(buyer); // This will log the buyer object to the console  
+    </script>
+</body>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Fetch user data from sessionStorage
+      const buyerData = sessionStorage.getItem('buyer');
+
+      
+      if (buyerData) {
+        // Parse the buyer object
+        const buyer = JSON.parse(buyerData);
+
+        // Update the HTML elements with user details
+        document.getElementById('userName').textContent = buyer.username; // Replace 'name' with the actual property name
+        document.getElementById('userEmail').textContent = "not available"; // Replace 'email' with the actual property name
+    } else {
+        console.error('No buyer data found in sessionStorage.');
+         // Optionally, redirect to the login page
+         // window.location.href = "/login";
+    }
+});
+    
+</script>
+</html>
